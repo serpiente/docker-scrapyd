@@ -1,0 +1,28 @@
+version: "3.8"
+services:
+  scrapyd:
+    container_name: scrapyd
+    build:
+      context: .
+      dockerfile: ./scrapyd/Dockerfile
+    ports:
+      - "6800:6800"
+    volumes:
+      - ./data:/var/lib/scrapyd
+      - /usr/local/lib/python3.11/dist-packages
+    restart: unless-stopped
+  scrapydweb:
+    container_name: scrapydweb
+    build: ./scrapydweb
+    ports:
+      - "5000:5000"
+    restart: unless-stopped
+    volumes:
+      - ./data:/var/lib/scrapyd
+    environment:
+      - SCRAPY_WEB_USERNAME=user
+      - SCRAPY_WEB_PASSWORD=user
+      - SCRAPYD_SERVERS=scrapyd:6800
+      - LOCAL_SCRAPYD_LOGS_DIR=/var/lib/scrapyd/logs
+    depends_on:
+      - scrapyd
